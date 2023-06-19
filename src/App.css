@@ -54,6 +54,10 @@
     margin-bottom: 20px;
 }
 
+.CardImg{
+    width: 100px;
+    transition: 0.1s;
+}
 
 table tbody tr:nth-child(odd) {
 	background-color: rgba(0, 0, 0, .3);

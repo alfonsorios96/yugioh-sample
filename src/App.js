@@ -4,9 +4,11 @@ import {useEffect, useState} from "react";
 function App() {
     const [magicEquipSpells, setMagicEquipSpells] = useState([]);
 
-    const [limit, setLimit] = useState(10);
+    const [limit, setLimit] = useState(4);
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("")
+    const [cardImages, setCardImages] = useState([]);
+
 
     useEffect(() => {
         fetch(`http://localhost:3004/data?_page=${page}&_limit=${limit}`, {
@@ -35,38 +37,40 @@ function App() {
             });
     }, [limit, page]);
 
-    //Efecto aplicado cuando Search cambia, es decir, cuando el campo de busqueda sufre un cambio
-
-useEffect(() => {
-    //guarde el url de la api en una variable llamada url
+    // Efecto aplicado cuando Search cambia, es decir, cuando el campo de búsqueda sufre un cambio
+    useEffect(() => {
+    // Guarda la URL de la API en una variable llamada url
     let url = `http://localhost:3004/data?_page=${page}&_limit=${limit}`;
-    
-    //si Search cambia, a la url se le agrega el filtro de busqueda por nombre
+  
+    // Se agrega la parte de búsqueda a la URL si Search cambia
     if (search) {
       url += `&name_like=${search}`;
     }
-   //se hace la peticion con el url ya compuesto con metodo get, y con el tipo de contenido a obtener
+  
+    // Se hace la petición ya con la URL compuesta
     fetch(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json"
       }
-    }) //hecha la peticion se revisa el status y si es estrictamente igual a 200 la respuesta se pasara a JSON, 
-       //Si no es JSON se mostrara un mensaje para el usuario diciendo que salio mal
+    })
       .then(response => {
+        // Se verifica si la petición fue respondida con éxito
         if (response.status === 200) return response.json();
         return {
           code: response.status,
-          message: "Verifique conexion"
+          message: "Verifique la conexión"
         };
-      }) //hago la condicion para revisar que la respuesta sea un arreglo con longitud mayor a 0, si lo es, se pasaran los datos
-         //asignados a la tabla
+      })
       .then(payload => {
+        // Se asignan los datos al estado Magic
         if (Array.isArray(payload)) {
           if (payload.length > 0) {
             setMagicEquipSpells(payload);
-            //Cualquier resultado que no sea un arreglo con informacion pasara un mensaje de error indicando que no hubieron resultados
+            const images = payload.map(card => card.card_images[0].image_url_small);
+            setCardImages(images);
           } else {
+            setMagicEquipSpells([]); // Actualizar el estado con un array vacío
             alert("No se encontraron resultados.");
           }
         } else {
@@ -77,6 +81,8 @@ useEffect(() => {
         alert(error.message);
       });
   }, [limit, page, search]);
+  
+      
   
   
     //manejador de cambio de paginas
@@ -99,7 +105,6 @@ useEffect(() => {
                 console.log(error);
             });
     };*/
-
     return (
         <div className="App">
             {/*esto es un fondo animado que saque de una libreria en linea*/}
@@ -155,7 +160,7 @@ useEffect(() => {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     />
-
+                    
 
                 </div>
             <table>
@@ -163,23 +168,29 @@ useEffect(() => {
                 <tr>
                     <th>Name</th>
                     <th>Description</th>
+                    <th>Card</th>
                 </tr>
                 </thead>
                 <tbody>
-                {
-                    magicEquipSpells.map(card =>
-                        <tr>
-                            <td>{card.name}</td>
-                            <td>{card.desc}</td>
-                        </tr>
-                    )}
+                {magicEquipSpells.map((card, index) => (
+                    <tr key={card.id}>
+                        <td>{card.name}</td>
+                        <td>{card.desc}</td>
+                        <td>
+                            <img 
+                            className='CardImg'
+                            src={cardImages[index]} alt={card.name} />
+                        </td>
+                    </tr>
+                        ))
+                }
                 </tbody>
             </table>
             </div>
         {/*esta seccion son los botones para navegar entre las primeras 16 paginas*/}
         
             <div className='appNav'>
-                <button className='appNav__ANT' onClick={() => handlePageChange(page - 1)}>Ant.</button>
+              <button className='appNav__ANT' onClick={() => handlePageChange(page - 1)}>Ant.</button>
                 <button className='appNav_button' onClick={() => handlePageChange(1)}>1</button>
                 <button className='appNav_button' onClick={() => handlePageChange(2)}>2</button>
                 <button className='appNav_button' onClick={() => handlePageChange(3)}>3</button>

@@ -10,31 +10,31 @@ function App() {
     const [cardImages, setCardImages] = useState([]);
 
 
-    useEffect(() => {
-        fetch(`http://localhost:3004/data?_page=${page}&_limit=${limit}`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            }
-        })
-            .then(response => {
-                if (response.status === 200) return response.json();
-                return {
-                    code: response.status,
-                    message: "Verifique conexion"
-                };
-            })
-            .then(payload => {
+    useEffect(async () => {
+        try {
+            const response = await fetch(`http://localhost:3004/data?_page=${page}&_limit=${limit}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+            let payload;
+            if (response.status === 200) {
+                payload = await response.json();
                 if (Array.isArray(payload) && payload.length > 0) {
                     setMagicEquipSpells(payload);
                 } else {
                     // Aqui hay un error
                     alert(payload.message);
                 }
-            })
-            .catch(error => {
-                alert(error.message);
-            });
+            }
+        } catch (error) {
+            alert(error.message);
+        }
+        /*return {
+            code: response.status,
+            message: "Verifique conexion"
+        };*/
     }, [limit, page]);
 
     // Efecto aplicado cuando Search cambia, es decir, cuando el campo de búsqueda sufre un cambio
